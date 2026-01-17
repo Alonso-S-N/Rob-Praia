@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Controle</title>
+  <meta name="viewport" content="width=device-width">
+  <style>
+    button { width: 30%; height: 15vh; font-size: 5vh; margin: 1vh; }
+    .esteira { background: #ffcc00; }
+  </style>
+</head>
+<body>
+  <h2>🎮 Controle</h2>
+
+  <!-- LOCOMOÇÃO -->
+  <button id="fw">▲ Frente</button><br>
+  <button id="le">◀ Esq</button>
+  <button id="st">⏹ Stop</button>
+  <button id="ri">▶ Dir</button><br>
+  <button id="bk">▼ Trás</button>
+
+  <!-- ESTEIRA -->
+  <br>
+  <button id="estFwd" class="esteira">Esteira ▲</button>
+  <button id="estRev" class="esteira">Esteira ▼</button>
+
+  <script>
+    const ws = new WebSocket("ws://10.91.63.162:8766");
+    ws.onopen  = () => console.log("✅ Conectado");
+    ws.onerror = e => console.error("❌", e);
+
+    function put(k, v) {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({action: "put", table: "phone", key: k, value: v}));
+        console.log("PUT", k, v);
+      }
+    }
+
+    /* ---------- LOCOMOÇÃO ---------- */
+    const mapMove = {
+      fw:  {k: "leftY", v: -1}, 
+      bk:  {k: "leftY", v:  1},
+      le:  {k: "leftX", v: -1},
+      ri:  {k: "leftX", v:  1},
+      st:  {k: "leftY", v:  0}
+    };
+
+    Object.entries(mapMove).forEach(([id, {k, v}]) => {
+      const btn = document.getElementById(id);
+      btn.onmousedown = btn.ontouchstart = () => put(k, v);
+      btn.onmouseup   = btn.ontouchend   = () => put(k, 0);
+    });
+
+    /* ---------- ESTEIRA ---------- */
+    const estFwd = document.getElementById("estFwd");
+    const estRev = document.getElementById("estRev");
+
+    estFwd.onmousedown = estFwd.ontouchstart = () => put("esteira",  1);   // sobe
+    estFwd.onmouseup   = estFwd.ontouchend   = () => put("esteira",  0);
+
+    estRev.onmousedown = estRev.ontouchstart = () => put("esteira", -1);   // desce
+    estRev.onmouseup   = estRev.ontouchend   = () => put("esteira",  0);
+  </script>
+</body>
+</html>
