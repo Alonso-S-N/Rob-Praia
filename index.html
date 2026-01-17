@@ -1,65 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <meta charset="utf-8">
   <title>Controle</title>
-  <meta name="viewport" content="width=device-width">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
-    button { width: 30%; height: 15vh; font-size: 5vh; margin: 1vh; }
-    .esteira { background: #ffcc00; }
+    /* ---- RESET / BASE ---- */
+    *{box-sizing:border-box;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;
+      -webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+    body{margin:0;font-family:system-ui;background:#111;color:#fff;display:flex;flex-direction:column;align-items:center;
+         justify-content:center;height:100vh;}
+    h2{margin:0 0 .8rem;font-size:1.6rem;}
+
+    /* ---- GRID DOS BOTÕES ---- */
+    .grid{display:grid;gap:8px;grid-template-columns:repeat(3,1fr);width:90vw;max-width:420px;}
+    button{border:none;border-radius:50%;font-size:7vw;font-weight:bold;color:#fff;background:#333;
+           aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+    button:active{background:#555;}
+    .esteira{background:#fc0;color:#000;}
+    .esteira:active{background:#fd5;}
+    #st{background:#c00;}
   </style>
 </head>
 <body>
   <h2>🎮 Controle</h2>
 
-  <!-- LOCOMOÇÃO -->
-  <button id="fw">▲ Frente</button><br>
-  <button id="le">◀ Esq</button>
-  <button id="st">⏹ Stop</button>
-  <button id="ri">▶ Dir</button><br>
-  <button id="bk">▼ Trás</button>
+  <div class="grid">
+    <span></span>
+    <button id="fw" data-key="leftY" data-val="-1">▲</button>
+    <span></span>
 
-  <!-- ESTEIRA -->
-  <br>
-  <button id="estFwd" class="esteira">Esteira ▲</button>
-  <button id="estRev" class="esteira">Esteira ▼</button>
+    <button id="le" data-key="leftX" data-val="-1">◀</button>
+    <button id="st" data-key="leftY" data-val="0">⏹</button>
+    <button id="ri" data-key="leftX" data-val="1">▶</button>
+
+    <span></span>
+    <button id="bk" data-key="leftY" data-val="1">▼</button>
+    <span></span>
+
+    <!-- Esteira -->
+    <button id="estFwd" data-key="esteira" data-val="1" class="esteira">▲</button>
+    <span></span>
+    <button id="estRev" data-key="esteira" data-val="-1" class="esteira">▼</button>
+  </div>
 
   <script>
     const ws = new WebSocket("ws://10.91.63.162:8766");
     ws.onopen  = () => console.log("✅ Conectado");
     ws.onerror = e => console.error("❌", e);
 
-    function put(k, v) {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({action: "put", table: "phone", key: k, value: v}));
-        console.log("PUT", k, v);
+    function send(key,val){
+      if (ws.readyState === WebSocket.OPEN){
+        ws.send(JSON.stringify({action:"put",table:"phone",key:key,value:val}));
+        console.log("PUT",key,val);
       }
     }
 
-    /* ---------- LOCOMOÇÃO ---------- */
-    const mapMove = {
-      fw:  {k: "leftY", v: -1}, 
-      bk:  {k: "leftY", v:  1},
-      le:  {k: "leftX", v: -1},
-      ri:  {k: "leftX", v:  1},
-      st:  {k: "leftY", v:  0}
-    };
+    /* ---- VINCULA BOTÕES ---- */
+    document.querySelectorAll("button").forEach(btn => {
+      const k = btn.dataset.key;
+      const v = Number(btn.dataset.val);
 
-    Object.entries(mapMove).forEach(([id, {k, v}]) => {
-      const btn = document.getElementById(id);
-      btn.onmousedown = btn.ontouchstart = () => put(k, v);
-      btn.onmouseup   = btn.ontouchend   = () => put(k, 0);
+      function start(e){ e.preventDefault(); send(k,v); }
+      function stop (e){ e.preventDefault(); send(k,0); }
+
+      btn.addEventListener("touchstart", start, {passive:false});
+      btn.addEventListener("touchend"  , stop , {passive:false});
+      btn.addEventListener("touchcancel", stop , {passive:false});
+      /* fallback mouse */
+      btn.addEventListener("mousedown", start);
+      btn.addEventListener("mouseup"  , stop );
+      btn.addEventListener("mouseleave", stop ); // segurar e arrastar fora
     });
-
-    /* ---------- ESTEIRA ---------- */
-    const estFwd = document.getElementById("estFwd");
-    const estRev = document.getElementById("estRev");
-
-    estFwd.onmousedown = estFwd.ontouchstart = () => put("esteira",  1);   // sobe
-    estFwd.onmouseup   = estFwd.ontouchend   = () => put("esteira",  0);
-
-    estRev.onmousedown = estRev.ontouchstart = () => put("esteira", -1);   // desce
-    estRev.onmouseup   = estRev.ontouchend   = () => put("esteira",  0);
   </script>
 </body>
 </html>

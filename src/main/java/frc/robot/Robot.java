@@ -37,12 +37,10 @@ public class Robot extends TimedRobot {
     double left = (y + x) * speed;
     double right = (y - x) * speed;
 
-    VictorSPX esteira = new VictorSPX(5);   // canal que você usar
 
-// dentro de teleopPeriodic()
 double esteiraPower = phone.getEntry("esteira").getDouble(0);
-MathUtil.clamp(esteiraPower, -0.5, 0.5); 
-esteira.set(ControlMode.PercentOutput, esteiraPower);
+esteiraPower = MathUtil.clamp(esteiraPower, -0.3, 0.3); 
+Esteira.set(esteiraPower);
 
     left1.set(ControlMode.PercentOutput, left);
     left2.set(ControlMode.PercentOutput, left);
