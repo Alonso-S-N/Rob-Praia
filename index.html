@@ -5,37 +5,128 @@
   <title>Controle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
-    /* ---- RESET / BASE ---- */
-    *{box-sizing:border-box;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;
-      -webkit-tap-highlight-color:transparent;touch-action:manipulation;}
-    body{margin:0;font-family:system-ui;background:#111;color:#fff;display:flex;flex-direction:column;align-items:center;
-         justify-content:center;height:100vh;}
-    h2{margin:0 0 .8rem;font-size:1.6rem;}
+  /* Reset básico */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
 
-    /* ---- GRID DOS BOTÕES ---- */
-    .grid{display:grid;gap:8px;grid-template-columns:repeat(3,1fr);width:90vw;max-width:420px;}
-    button{border:none;border-radius:50%;font-size:7vw;font-weight:bold;color:#fff;background:#333;
-           aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;transition:background .15s;}
-    button:active{background:#555;}
-    .esteira{background:#fc0;color:#000;}
-    .esteira:active{background:#fd5;}
-    #st{background:#c00;}
+body {
+  background: linear-gradient(135deg, #0f2027, #432020, #642c2c);
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 10vh;
+  height: 100vh;
+  overflow: hidden;
+}
+
+h2 {
+  font-size: 10vw;
+  margin-bottom: 4vh;
+  letter-spacing: 0.1em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 90vw;
+  max-width: 400px;
+}
+
+button {
+  border: none;
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  font-size: 6vw;
+  font-weight: bold;
+  color: #ff0000;
+  background: linear-gradient(145deg, #3a0000, #1a0000,#0000);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  transition: background 0.1s;
+}
+
+button:active,
+button.ativo {
+  background: #601212;
+  box-shadow: 0 0 15px #ff0000;
+}
+
+.esteira {
+  background: -moz-linear-gradient(top, #3a0000 0%, #1a0000 50%, #0000 100%);
+  color: #ff0000;
+}
+
+.esteira:active,
+.esteira.ativo {
+  background: #601212;
+  box-shadow: 0 0 15px #ff0000;
+}
+
+#st {
+  background: -webkit-repeating-linear-gradient(45deg, #3a0000, #3a0000 10px, #ff0404 10px, #3a0000 20px);
+  box-shadow: 0 0 15px #ff0000;
+}
+
+#st:active,
+#st.ativo {
+  background: #ff6b6b;
+  box-shadow: 0 0 15px #ff6b6b;
+}
+
+#st img {
+  width: 90%;       
+  height: auto;      
+  display: block;   
+  object-fit: cover; 
+  border-radius: 50%;
+  margin: 0 auto;    
+  pointer-events: none; 
+}
+button img{
+  width:100%;
+  height:auto;
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
+  margin: 0 auto;
+  pointer-events: none;
+}
   </style>
 </head>
 <body>
-  <h2>🎮 Controle</h2>
+  <h2 id="titulo"></h2>   
+  <script>
+    const texto = "🐙 Controle 🐙"; 
+    const cores = ["000000","000000","#3D0000","#3D0000","#3D0000","000000","000000"]; 
+    titulo.innerHTML = [...texto]               //
+                       .map((l,i)=>`<span style="color:${cores[i%cores.length]}">${l}</span>`)
+                       .join("");
+    titulo.style.fontSize = "6vw";             
+    titulo.style.letterSpacing = "0.1em";       
+    titulo.style.textAlign = "center";
+    titulo.style.margin = "0vh 0vh 0vh 0";
+  </script>
 
   <div class="grid">
     <span></span>
-    <button id="fw" data-key="leftY" data-val="-1">▲</button>
+    <button id="fw" data-key="leftY" data-val="-1">⬆</button>
     <span></span>
 
     <button id="le" data-key="leftX" data-val="-1">◀</button>
-    <button id="st" data-key="leftY" data-val="0">⏹</button>
+    <button id="st" data-key="leftY" data-val="0"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCuRRokysHso9-nIqRdzQIaznytnvGafFo-w&s" sizes=40px ></button>
     <button id="ri" data-key="leftX" data-val="1">▶</button>
 
     <span></span>
-    <button id="bk" data-key="leftY" data-val="1">▼</button>
+    <button id="bk" data-key="leftY" data-val="1">⬇</button>
     <span></span>
 
     <!-- Esteira -->
@@ -48,30 +139,43 @@
     const ws = new WebSocket("ws://10.91.63.162:8766");
     ws.onopen  = () => console.log("✅ Conectado");
     ws.onerror = e => console.error("❌", e);
-
+  
     function send(key,val){
       if (ws.readyState === WebSocket.OPEN){
         ws.send(JSON.stringify({action:"put",table:"phone",key:key,value:val}));
-        console.log("PUT",key,val);
       }
     }
-
-    /* ---- VINCULA BOTÕES ---- */
+  
+    /* ---- vincula os botões ---- */
     document.querySelectorAll("button").forEach(btn => {
       const k = btn.dataset.key;
       const v = Number(btn.dataset.val);
-
-      function start(e){ e.preventDefault(); send(k,v); }
-      function stop (e){ e.preventDefault(); send(k,0); }
-
+  
+      function start(e){
+        e.preventDefault();
+        btn.classList.add("ativo");   
+        send(k,v);
+      }
+      function stop(e){
+        e.preventDefault();
+        btn.classList.remove("ativo");
+        send(k,0);
+      }
+  
+      /* touch */
       btn.addEventListener("touchstart", start, {passive:false});
       btn.addEventListener("touchend"  , stop , {passive:false});
       btn.addEventListener("touchcancel", stop , {passive:false});
       /* fallback mouse */
       btn.addEventListener("mousedown", start);
       btn.addEventListener("mouseup"  , stop );
-      btn.addEventListener("mouseleave", stop ); // segurar e arrastar fora
+      btn.addEventListener("mouseleave", stop );
     });
   </script>
+  
+  <style>
+    button.ativo { background:#fffefe !important; }
+    .esteira.ativo { background:rgb(255, 254, 249) !important; }
+  </style>
 </body>
 </html>
