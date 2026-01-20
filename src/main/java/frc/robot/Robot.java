@@ -39,7 +39,7 @@ public class Robot extends TimedRobot {
 
 
 double esteiraPower = phone.getEntry("esteira").getDouble(0);
-esteiraPower = MathUtil.clamp(esteiraPower, -0.3, 0.3); 
+esteiraPower = MathUtil.clamp(esteiraPower, -0.1, 0.1); 
 Esteira.set(esteiraPower);
 
     left1.set(ControlMode.PercentOutput, left);
